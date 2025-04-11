@@ -22,12 +22,12 @@ public class InventoryController {
     }
 
     @GetMapping(path="/api/getInventoryTitleList")
-    public String InventoryTitleList() {
+    public List<String> InventoryTitleList() {
 
         List<String> categoryList = inventoryRepository.findDistinctCategoryBy();
         System.out.println("CCB");
         System.out.println(categoryList);
-        return "" ;
+        return categoryList ;
 
     }
 }
