@@ -30,7 +30,8 @@ public class InventoryDTO {
     InventoryDimensions dimensions ;
     String imageUrl ;
     String status ;
-    private UserDTO seller ; // Foreign Key to CustomUser
+    private UserDTO sellerObject ; // Foreign Key to CustomUser
+    private String seller ; // Seller Name for Frontend
 
     public String getInventoryId() {
         return inventoryId;
@@ -168,4 +169,46 @@ public class InventoryDTO {
         this.status = status;
     }
 
+    public UserDTO getSellerObject() {
+        return sellerObject;
+    }
+
+    public void setSellerObject(UserDTO seller) {
+        this.sellerObject = seller;
+    }
+
+    public String getSeller() {
+        return seller;
+    }
+
+    public void setSeller(String seller) {
+        this.seller = seller;
+    }
+
+    //
+
+    @Override
+    public String toString() {
+        return "InventoryDTO{" +
+                "id=" + id +
+                ", inventoryId='" + inventoryId + '\'' +
+                ", title='" + title + '\'' +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", brand='" + brand + '\'' +
+                ", category='" + category + '\'' +
+                ", color=" + color +
+                ", material=" + material +
+                ", hotSalesScore=" + hotSalesScore +
+                ", weight=" + weight +
+                ", rating=" + rating +
+                ", price=" + price +
+                ", discount=" + discount +
+                ", quantity=" + quantity +
+                ", dimensions=" + dimensions +
+                ", imageUrl='" + imageUrl + '\'' +
+                ", status='" + status + '\'' +
+                ", seller=" + sellerObject +
+                '}';
+    }
 }

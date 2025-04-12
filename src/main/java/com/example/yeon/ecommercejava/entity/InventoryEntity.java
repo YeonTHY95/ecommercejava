@@ -34,7 +34,7 @@ public class InventoryEntity {
     Double discount ;
     Integer quantity ;
 
-    @Embedded
+//    @Embedded
     InventoryDimensions dimensions ;
 
     String imageUrl ;
@@ -42,7 +42,9 @@ public class InventoryEntity {
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name= "seller")
-    private UserEntity seller ; // Foreign Key to CustomUser
+    private UserEntity sellerObject ; // Foreign Key to CustomUser
+    private String sellerName;
+
 
 //    public InventoryEntity(Long id, String inventoryId, String title, String name, String description, String brand, String category, List<String> color, List<String> material, Double hotSalesScore, Double weight, Double rating, Double price, Double discount, Integer quantity, InventoryDimensions dimensions, String imageUrl, String status, UserEntity seller) {
 //        this.id = id;
@@ -210,12 +212,20 @@ public class InventoryEntity {
         this.status = status;
     }
 
-    public UserEntity getSeller() {
-        return seller;
+    public UserEntity getSellerObject() {
+        return sellerObject;
     }
 
-    public void setSeller(UserEntity seller) {
-        this.seller = seller;
+    public void setSellerObject(UserEntity seller) {
+        this.sellerObject = seller;
+    }
+
+    public String getSellerName() {
+        return sellerName;
+    }
+
+    public void setSellerName(String sellerName) {
+        this.sellerName = sellerName;
     }
 
     @Override
