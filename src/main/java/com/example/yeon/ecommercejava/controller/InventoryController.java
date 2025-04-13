@@ -93,7 +93,7 @@ public class InventoryController {
     }
 
     @ResponseBody
-    @GetMapping(path = "api/searchInventory")
+    @GetMapping(path = "/api/searchInventory")
     public ResponseEntity<List<InventoryCardInfoDTO>> SearchInventory(@RequestParam(value="category") Optional<String> category, @RequestParam(value="title") Optional<String> title ){
         String categoryValue = category.orElseGet(() -> "");
         String titleValue = title.orElseGet(()-> "");
