@@ -2,6 +2,7 @@ package com.example.yeon.ecommercejava.entity;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -22,7 +23,7 @@ public class OrderEntity {
     @JoinColumn(name= "seller")
     private UserEntity seller ; // Foreign Key
 
-    private Date orderDate = new Date();
+    private LocalDateTime orderDate = LocalDateTime.now();
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name= "inventory")
@@ -31,7 +32,7 @@ public class OrderEntity {
     private String selectedColor ;
 
 
-//    public OrderEntity(Long id, String status, UserEntity buyer, UserEntity seller, Date orderDate, InventoryEntity inventory, Integer quantity, String selectedColor) {
+//    public OrderEntity(Long id, String status, UserEntity buyer, UserEntity seller, LocalDateTime orderDate, InventoryEntity inventory, Integer quantity, String selectedColor) {
 //        this.id = id;
 //        this.status = status;
 //        this.buyer = buyer;
@@ -75,11 +76,11 @@ public class OrderEntity {
         this.seller = seller;
     }
 
-    public Date getOrderDate() {
+    public LocalDateTime getOrderDate() {
         return orderDate;
     }
 
-    public void setOrderDate(Date orderDate) {
+    public void setOrderDate(LocalDateTime orderDate) {
         this.orderDate = orderDate;
     }
 

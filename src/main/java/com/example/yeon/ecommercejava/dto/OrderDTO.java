@@ -5,7 +5,9 @@ import com.example.yeon.ecommercejava.entity.UserEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import org.springframework.cglib.core.Local;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 public class OrderDTO {
@@ -17,7 +19,7 @@ public class OrderDTO {
 
     private UserDTO seller ; // Foreign Key
 
-    private Date orderDate = new Date();
+    private LocalDateTime orderDate = LocalDateTime.now();
 
     private InventoryDTO inventory ; // Foreign Key
     private Integer quantity ;
@@ -55,11 +57,11 @@ public class OrderDTO {
         this.seller = seller;
     }
 
-    public Date getOrderDate() {
+    public LocalDateTime getOrderDate() {
         return orderDate;
     }
 
-    public void setOrderDate(Date orderDate) {
+    public void setOrderDate(LocalDateTime orderDate) {
         this.orderDate = orderDate;
     }
 

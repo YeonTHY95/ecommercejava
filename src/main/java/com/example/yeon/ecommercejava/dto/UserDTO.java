@@ -1,5 +1,6 @@
 package com.example.yeon.ecommercejava.dto;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 public class UserDTO {
@@ -11,7 +12,7 @@ public class UserDTO {
     private String sex ;
     private String phoneNumber ;
     private String role ;
-    private Date date_joined = new Date() ;
+    private LocalDateTime date_joined = LocalDateTime.now() ;
 
     public String getUsername() {
         return username;
@@ -61,11 +62,19 @@ public class UserDTO {
         this.role = role;
     }
 
-    public Date getDate_joined() {
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public LocalDateTime getDate_joined() {
         return date_joined;
     }
 
-    public void setDate_joined(Date date_joined) {
+    public void setDate_joined(LocalDateTime date_joined) {
         this.date_joined = date_joined;
     }
 }
