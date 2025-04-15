@@ -31,15 +31,15 @@ const MyCart = () => {
                     console.log("My Cart Response is ", getMyCartResponse.data);
                     const inventoryList = getMyCartResponse.data.map((i: {inventory:InventoryInterface[],quantity:number,selectedColor:string}) => {
                         return {
-                            id: i.inventory[0].id,
-                            title:i.inventory[0].title, 
-                            name: i.inventory[0].name, 
-                            price:i.inventory[0].price,
-                            imageUrl:i.inventory[0].imageUrl, 
-                            rating:i.inventory[0].rating,
-                            category:i.inventory[0].category,
+                            id: i.inventory.id,
+                            title:i.inventory.title,
+                            name: i.inventory.name,
+                            price:i.inventory.price,
+                            imageUrl:i.inventory.imageUrl,
+                            rating:i.inventory.rating,
+                            category:i.inventory.category,
                             quantity:i.quantity,
-                            colorList : i.inventory[0].color,
+                            colorList : i.inventory.color,
                             selectedColor:i.selectedColor
                         }
                     });

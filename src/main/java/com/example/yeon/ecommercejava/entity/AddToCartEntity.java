@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 public class AddToCartEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     Long id ;
 
     @ManyToOne(cascade = CascadeType.ALL)
@@ -65,6 +65,18 @@ public class AddToCartEntity {
     }
 
     public void setSelectedColor(String selectedColor) {
+
         this.selectedColor = selectedColor;
+    }
+
+    @Override
+    public String toString() {
+        return "AddToCartEntity{" +
+                "id=" + id +
+                ", inventory=" + inventory +
+                ", user=" + user +
+                ", quantity=" + quantity +
+                ", selectedColor='" + selectedColor + '\'' +
+                '}';
     }
 }

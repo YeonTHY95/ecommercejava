@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 @RestController
 public class InventoryController {
 
+
+
     private ModelMapper modelMapper;
 
     private InventoryRepository inventoryRepository;
@@ -47,18 +49,20 @@ public class InventoryController {
     }
 
     @ResponseBody
-    @GetMapping(path="/api/getInventoryDetail/{id}")
-    public ResponseEntity<InventoryDTO> getInventoryDetail(@PathVariable Long id) {
+    @GetMapping(path="/api/getInventoryDetail")
+    public ResponseEntity<InventoryDTO> getInventoryDetail(@RequestParam Long id) {
+        inventoryLogger.info("Inside getInventoryDetail API");
         Optional<InventoryEntity> inventory =  inventoryRepository.findById(id);
 
         if ( inventory.isEmpty()) {
+            inventoryLogger.info("Inventory Not Found");
             return new ResponseEntity("Inventory Not Found", HttpStatus.NOT_FOUND);
         }
         InventoryEntity inventoryEntity = inventory.orElseThrow(() -> new RuntimeException("Inventory Not Found"));
         InventoryDTO inventoryDTO = modelMapper.map(inventoryEntity, InventoryDTO.class);
         UserDTO sellerDTO = inventoryDTO.getSellerObject();
         String sellerName = inventoryDTO.getSellerObject().getUsername();
-        System.out.println("UserDTO Seller Name is " + sellerDTO.getUsername());
+        inventoryLogger.info("UserDTO Seller Name is " + sellerDTO.getUsername());
         inventoryDTO.setSeller(sellerName);
         return new ResponseEntity<>(inventoryDTO, HttpStatus.OK);
 

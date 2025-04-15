@@ -230,7 +230,7 @@ public class InventoryEntity {
 
     @Override
     public String toString() {
-        return "Inventory Class toString's title " + this.title ;
+        return "Inventory ID "+ this.id + " Class toString's title " + this.title ;
 //        return "Order ID : " + this.id  + " item " + this.title + " from " + this.seller + " by " + this.buyer " at " + this.orderDate ;
 
     }

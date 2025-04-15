@@ -2,6 +2,7 @@ package com.example.yeon.ecommercejava.controller;
 
 import com.example.yeon.ecommercejava.dto.AddToCartDTO;
 import com.example.yeon.ecommercejava.dto.AddToCartGetResponseDTO;
+import com.example.yeon.ecommercejava.dto.AddToCartPOSTRequest;
 import com.example.yeon.ecommercejava.dto.InventoryDTO;
 import com.example.yeon.ecommercejava.entity.AddToCartEntity;
 import com.example.yeon.ecommercejava.entity.InventoryEntity;
@@ -35,13 +36,16 @@ public class AddToCartController {
 
     @ResponseBody
     @GetMapping(path = "/api/myCart")
-    public ResponseEntity<List<AddToCartGetResponseDTO>> getAddToCart(@RequestParam Long userId){
+    public ResponseEntity<List<AddToCartGetResponseDTO>> getAddToCart(@RequestParam Long id){
         try {
+            addToCartLogger.info("Inside View MyCart");
             List<AddToCartGetResponseDTO> ResponseList = new ArrayList<>();
-            List<AddToCartEntity> AddToCartEntityList = addToCartService.getAllAddToCart(userId) ;
+            List<AddToCartEntity> AddToCartEntityList = addToCartService.getAllAddToCart(id) ;
+            addToCartLogger.info("AddToCartEntityList is " + AddToCartEntityList);
             for (AddToCartEntity addToCartEntity : AddToCartEntityList) {
                 InventoryEntity inventoryEntity = addToCartEntity.getInventory();
                 InventoryDTO inventory = modelMapper.map(inventoryEntity, InventoryDTO.class);
+                addToCartLogger.info("After Mapping, InventoryDTO is " + inventory);
                 ResponseList.add(new AddToCartGetResponseDTO(inventory,addToCartEntity.getQuantity(),addToCartEntity.getSelectedColor()));
             }
             return new ResponseEntity<>(ResponseList, HttpStatus.OK);
@@ -54,12 +58,16 @@ public class AddToCartController {
 
     @ResponseBody
     @PostMapping(path="api/addToCart")
-    public ResponseEntity<List<AddToCartDTO>> postAddToCart(@RequestBody AddToCartDTO addToCartDTO) {
+    public ResponseEntity<List<AddToCartDTO>> postAddToCart(@RequestBody AddToCartPOSTRequest addToCartPOSTRequest) {
         try {
-            AddToCartEntity addToCartEntity = modelMapper.map(addToCartDTO, AddToCartEntity.class);
-            addToCartService.createAddToCart(addToCartEntity);
-
-            Integer totalQuantity = addToCartRepository.totalQuantity(addToCartEntity.getInventory().getId(),addToCartEntity.getUser().getId(), addToCartEntity.getSelectedColor());
+            addToCartLogger.info("Inside POST AddtoCart");
+//            AddToCartDTO addToCartDTO = new AddToCartDTO();
+//            AddToCartEntity addToCartEntity = modelMapper.map(addToCartDTO, AddToCartEntity.class);
+            AddToCartEntity addToCartEntity = addToCartService.mapFromAddToCartPOSTRequestToEntity(addToCartPOSTRequest);
+            addToCartLogger.info("before addToCartService.createAddToCart");
+            addToCartEntity= addToCartService.createAddToCart(addToCartEntity);
+            addToCartLogger.info("After addToCartService.createAddToCart, addToCartEntity is " + addToCartEntity);
+            Integer totalQuantity = addToCartRepository.totalQuantity(addToCartEntity.getInventory(),addToCartEntity.getUser(), addToCartEntity.getSelectedColor());
 
             List<AddToCartEntity> duplicatedAddToCartList = addToCartService.getDuplicateAddToCart(addToCartEntity);
 

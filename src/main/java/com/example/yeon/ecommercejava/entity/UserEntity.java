@@ -97,4 +97,18 @@ public class UserEntity {
     public void setDate_joined(LocalDateTime date_joined) {
         this.date_joined = date_joined;
     }
+
+    @Override
+    public String toString() {
+        return "UserEntity{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", age=" + age +
+                ", sex='" + sex + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", role='" + role + '\'' +
+                ", date_joined=" + date_joined +
+                '}';
+    }
 }
