@@ -64,7 +64,7 @@ const SearchInventoryComponent = ({categoryList}:{categoryList:{category:string}
                 }
             }/>
             <select className="outline-rose-500 border-lime-500" id="category" name="category" value={category} onChange={e => setCategory(e.target.value)}>
-                <option value="" >All Categories</option>
+                <option key="all" value="" >All Categories</option>
                 {categoryList && categoryList.map( c => (
                     <option key={c.category} value={c.category}>
                     {c.category}

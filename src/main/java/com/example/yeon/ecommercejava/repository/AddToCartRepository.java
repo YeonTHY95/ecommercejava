@@ -11,12 +11,12 @@ import java.util.List;
 @Repository
 public interface AddToCartRepository extends JpaRepository<AddToCartEntity, Long> {
 
-    @Query("SELECT a FROM AddToCartEntity a WHERE users=:userId")
+    @Query("SELECT a FROM AddToCartEntity a WHERE a.user=:userId")
     List<AddToCartEntity> getAllInventoryBySpecificUser(@Param("userId") Long userId);
 
-    @Query("SELECT SUM(a.quantity) FROM AddToCartEntity a WHERE a.inventory=:inventory AND a.users=:userId AND a.selected_color=:selectedColor")
+    @Query("SELECT SUM(a.quantity) FROM AddToCartEntity a WHERE a.inventory=:inventory AND a.user=:userId AND a.selectedColor=:selectedColor")
     Integer totalQuantity(@Param("inventory") Long inventoryId, @Param("userId") Long userId, @Param("selectedColor") String selectedColor);
 
-    @Query("SELECT a FROM AddToCartEntity a WHERE a.inventory=:inventory AND a.users=:userId AND a.selected_color=:selectedColor")
+    @Query("SELECT a FROM AddToCartEntity a WHERE a.inventory=:inventory AND a.user=:userId AND a.selectedColor=:selectedColor")
     List<AddToCartEntity> getDuplicateAddToCart(@Param("inventory") Long inventoryId, @Param("userId") Long userId, @Param("selectedColor") String selectedColor);
 }

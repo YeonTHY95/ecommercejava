@@ -33,7 +33,7 @@ const Login = () => {
         });
     
         if (axiosSignInResponse.status === 200) {
-            // console.log("axiosSignInResponse data is ",axiosSignInResponse.data);
+            console.log("axiosSignInResponse data is ",axiosSignInResponse.data);
             const getRoleResponse = await axios.get(`http://localhost:8000/api/userinfo?id=${axiosSignInResponse.data?.user?.pk}`);
 
             if (getRoleResponse.status === 200) {

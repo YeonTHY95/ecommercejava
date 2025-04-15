@@ -10,10 +10,12 @@ import java.util.Date;
 public class UserEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     Long id ;
 
+    @Column(unique=true)
     private String username ;
+
     private String password ;
     private Integer age ;
     private String sex ;
