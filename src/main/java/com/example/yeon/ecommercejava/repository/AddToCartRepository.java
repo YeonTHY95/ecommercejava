@@ -4,9 +4,11 @@ import com.example.yeon.ecommercejava.entity.AddToCartEntity;
 import com.example.yeon.ecommercejava.entity.InventoryEntity;
 import com.example.yeon.ecommercejava.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -21,4 +23,9 @@ public interface AddToCartRepository extends JpaRepository<AddToCartEntity, Long
 
     @Query("SELECT a FROM AddToCartEntity a WHERE a.inventory=:inventory AND a.user=:userId AND a.selectedColor=:selectedColor")
     List<AddToCartEntity> getDuplicateAddToCart(@Param("inventory") InventoryEntity inventory, @Param("userId") UserEntity userId, @Param("selectedColor") String selectedColor);
+
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM AddToCartEntity a WHERE a.user=:buyer")
+    void deleteAllAddToCartByBuyerId(@Param("buyer") UserEntity buyer);
 }

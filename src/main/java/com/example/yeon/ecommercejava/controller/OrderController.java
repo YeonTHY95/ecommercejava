@@ -1,6 +1,7 @@
 package com.example.yeon.ecommercejava.controller;
 
 import com.example.yeon.ecommercejava.dto.*;
+import com.example.yeon.ecommercejava.services.AddToCartService;
 import com.example.yeon.ecommercejava.services.OrderService;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -18,9 +19,11 @@ public class OrderController {
     public static final Logger orderLogger = LoggerFactory.getLogger(OrderController.class);
     private final OrderService orderService;
 //    private final ModelMapper modelMapper;
+    private AddToCartService addToCartService;
 
-    public OrderController(OrderService orderService, ModelMapper modelMapper) {
+    public OrderController(OrderService orderService, ModelMapper modelMapper, AddToCartService addToCartService) {
         this.orderService = orderService;
+        this.addToCartService = addToCartService;
 //        this.modelMapper = modelMapper;
     }
 
@@ -56,7 +59,10 @@ public class OrderController {
                         return new ResponseEntity<>(new OrderMessage("Error in MakeOrder with Quantity issue"), HttpStatus.BAD_REQUEST);
                     }
                 }
+
                 // Successfully created order
+                // Delete AddToCart Entries
+                addToCartService.deleteAllAddToCartByBuyerId(orderRequestDTO.getUser());
                 return new ResponseEntity<>(new OrderMessage("Order Created Successfully"), HttpStatus.CREATED);
             }
         }

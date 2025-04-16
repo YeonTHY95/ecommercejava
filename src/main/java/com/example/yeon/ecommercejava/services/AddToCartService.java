@@ -63,4 +63,16 @@ public class AddToCartService {
             throw new RuntimeException(e);
         }
     }
+
+    public void deleteAllAddToCartByBuyerId(Long buyerId) {
+        try {
+            UserEntity buyerEntity = userRepository.findById(buyerId).orElseThrow();
+            addToCartRepository.deleteAllAddToCartByBuyerId(buyerEntity);
+            addToCartLogger.info("Successfully Delete AddToCart for Buyer " + buyerEntity);
+        } catch (Exception e) {
+            addToCartLogger.info(String.valueOf(e));
+            throw new RuntimeException(e);
+        }
+
+    }
 }

@@ -2,6 +2,7 @@ package com.example.yeon.ecommercejava.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,9 +36,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 //            return;
 //        }
 
-        if (authentionHeader != null && authentionHeader.startsWith("Bearer ")) {
-            token = authentionHeader.substring(7);
-            username = jwtService.extractUsername(token);
+//        if (authentionHeader != null && authentionHeader.startsWith("Bearer ")) {
+//            token = authentionHeader.substring(7);
+//            username = jwtService.extractUsername(token);
+//        }
+
+        // Extract JWT from Cookie
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("jwtCookie".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                    username = jwtService.extractUsername(token);
+                }
+            }
         }
 
         if ( username != null & SecurityContextHolder.getContext().getAuthentication() == null) {

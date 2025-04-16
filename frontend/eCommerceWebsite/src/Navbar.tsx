@@ -45,7 +45,7 @@ const Navbar = ({categoryList}:{categoryList:{category:string}[]}) => {
             <button onClick={async ()=> {
 
               try{
-                await axios.post('http://localhost:8000/dj-rest-auth/logout');
+                await axios.post('http://localhost:8000/api/logout');
               }
               catch(error) {
                 if (axios.isAxiosError(error)) {
