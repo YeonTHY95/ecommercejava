@@ -40,7 +40,7 @@ public class UserService {
         userLogger.info("Authentication returned by AuthenticationManager is " + authentication);
         if (authentication.isAuthenticated()) {
             userLogger.info("verifyUser Successfully");
-            return jwtService.generateToken(loginDTO.getUsername());
+            return jwtService.generateAccessToken(loginDTO.getUsername());
         }
 
         return "Failed JWT Authentication" ;

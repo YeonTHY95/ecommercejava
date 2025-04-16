@@ -8,7 +8,6 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +27,7 @@ public class JWTService {
     Logger JWTServiceLogger = LoggerFactory.getLogger(JWTService.class);
 
     private String secretKey = "8kDuhzNm8i9VsLgCkxT1Qan8m4gNpBlReK3L0A6IVkYczCHUmPxrhW5wUc2n0LQE";
+    private String secretKeyForRefreshToken = "8kDuhzNm8i9VsLgCkxT1Qan8m4gNpBlReK3L0A6IVkYczCHUmPxrhW5wUc2n0LQW";
     private Integer jwtExpirationInMs = 10 * 60 * 1000; // 10 minutes
 
     Map<String, Object> claims = new HashMap<>();
@@ -36,15 +36,18 @@ public class JWTService {
         try{
             KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA256");
             SecretKey sk = Keys.secretKeyFor(SignatureAlgorithm.HS512); //keyGenerator.generateKey();
+            SecretKey skR = Keys.secretKeyFor(SignatureAlgorithm.HS512); //keyGenerator.generateKey();
             this.secretKey = Base64.getEncoder().encodeToString(sk.getEncoded());
+            this.secretKeyForRefreshToken = Base64.getEncoder().encodeToString(skR.getEncoded());
         }
         catch (NoSuchAlgorithmException e){
             throw new RuntimeException(e);
         }
     }
 
-    public String generateToken(String username) {
-        JWTServiceLogger.info("Generating Token");
+    public String generateAccessToken(String username) {
+        JWTServiceLogger.info("Generating access Token");
+        JWTServiceLogger.info("secretKey is " + secretKey);
         return Jwts.builder()
                 .claims()
                 .add(claims)
@@ -53,6 +56,20 @@ public class JWTService {
                 .expiration(new Date(System.currentTimeMillis() + jwtExpirationInMs))
                 .and()
                 .signWith(SignatureAlgorithm.HS512, secretKey)
+                .compact();
+    }
+
+    public String generateRefreshToken(String username) {
+        JWTServiceLogger.info("Generating refresh Token");
+        JWTServiceLogger.info("secretKeyForRefreshToken is " + secretKeyForRefreshToken);
+        return Jwts.builder()
+                .claims()
+                .add(claims)
+                .subject(username)
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000 )) // 24 hours
+                .and()
+                .signWith(SignatureAlgorithm.HS512, secretKeyForRefreshToken)
                 .compact();
     }
 

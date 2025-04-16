@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -28,7 +30,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String authentionHeader = request.getHeader("Authorization");
-        String token = null;
+        String accessToken = null;
+        String refreshToken = null;
         String username = null;
 
 //        if (authentionHeader == null || !authentionHeader.startsWith("Bearer ")) {
@@ -43,18 +46,38 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // Extract JWT from Cookie
         if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if ("jwtCookie".equals(cookie.getName())) {
-                    token = cookie.getValue();
-                    username = jwtService.extractUsername(token);
-                }
-            }
+
+            List<Cookie> cookieList = List.of(request.getCookies());
+            accessToken = cookieList.stream().filter(c -> c.getName() == "jwtCookie").findFirst().map(Cookie::getValue).orElse(null);
+
+            username = jwtService.extractUsername(accessToken);
+
+//            String accessToken = Arrays.stream(request.getCookies())
+//                    .filter(c -> c.getName().equals("accessToken"))
+//                    .findFirst()
+//                    .map(Cookie::getValue)
+//                    .orElse(null);
+//            for (Cookie cookie : request.getCookies()) {
+//                if ("jwtCookie".equals(cookie.getName())) {
+//                    accessToken = cookie.getValue();
+//                    username = jwtService.extractUsername(accessToken);
+//                    if ("jwtCookieForRefresh".equals(cookie.getName())) {
+//
+//                }
+//                }
+//            }
         }
 
         if ( username != null & SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = applicationContext.getBean(CustomUserDetailsService.class).loadUserByUsername(username);
-
-            if (jwtService.validateToken(token, userDetails)) {
+            List<Cookie> cookieList = List.of(request.getCookies());
+            refreshToken = cookieList.stream().filter(c -> c.getName() == "jwtCookieForRefresh").findFirst().map(Cookie::getValue).orElse(null);
+            if (jwtService.validateToken(accessToken, userDetails)) {
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
+            else if (jwtService.validateToken(refreshToken, userDetails)){
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
