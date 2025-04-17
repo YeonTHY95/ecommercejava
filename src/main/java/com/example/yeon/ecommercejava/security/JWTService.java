@@ -28,7 +28,7 @@ public class JWTService {
 
     private String secretKey = "8kDuhzNm8i9VsLgCkxT1Qan8m4gNpBlReK3L0A6IVkYczCHUmPxrhW5wUc2n0LQE";
     private String secretKeyForRefreshToken = "8kDuhzNm8i9VsLgCkxT1Qan8m4gNpBlReK3L0A6IVkYczCHUmPxrhW5wUc2n0LQW";
-    private Integer jwtExpirationInMs = 10 * 60 * 1000; // 10 minutes
+    private Integer jwtExpirationInMs =  10 * 1000 ; //10 * 60 * 1000; // 10 minutes
 
     Map<String, Object> claims = new HashMap<>();
 

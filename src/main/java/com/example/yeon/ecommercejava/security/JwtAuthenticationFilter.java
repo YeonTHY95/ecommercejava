@@ -5,6 +5,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,6 +23,7 @@ import java.util.List;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    Logger jwtAFLogger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
     @Autowired
     ApplicationContext applicationContext;
 
@@ -46,32 +49,44 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // Extract JWT from Cookie
         if (request.getCookies() != null) {
-
-            List<Cookie> cookieList = List.of(request.getCookies());
-            accessToken = cookieList.stream().filter(c -> c.getName() == "jwtCookie").findFirst().map(Cookie::getValue).orElse(null);
-
-            username = jwtService.extractUsername(accessToken);
+            jwtAFLogger.info("Inside JWT doFilterInternal getCookies()");
+            //Cookie[] cookieList = Arrays.stream(request.getCookies()) ;//List.of(request.getCookies());
+            //jwtAFLogger.info("cookieList is " + cookieList);
+//            Cookie accessTokenCookie = Arrays.stream(request.getCookies())
+//                    .filter(c -> c.getName().equals("jwtCookie"))
+//                    .findFirst().orElseGet(()-> null);
+//            accessToken = accessTokenCookie.getValue();
+////                    .map(Cookie::getValue)
+////                    .orElseGet(()-> null);
+//            //accessToken = cookieList.stream().filter(c -> c.getName() == "jwtCookie").findFirst().map(Cookie::getValue).orElse(null);
+//            jwtAFLogger.info("accessToken is " + accessToken);
+//            username = jwtService.extractUsername(accessToken);
 
 //            String accessToken = Arrays.stream(request.getCookies())
 //                    .filter(c -> c.getName().equals("accessToken"))
 //                    .findFirst()
 //                    .map(Cookie::getValue)
 //                    .orElse(null);
-//            for (Cookie cookie : request.getCookies()) {
-//                if ("jwtCookie".equals(cookie.getName())) {
-//                    accessToken = cookie.getValue();
-//                    username = jwtService.extractUsername(accessToken);
-//                    if ("jwtCookieForRefresh".equals(cookie.getName())) {
-//
-//                }
-//                }
-//            }
+            for (Cookie cookie : request.getCookies()) {
+                if ("jwtCookie".equals(cookie.getName())) {
+                    accessToken = cookie.getValue();
+                    jwtAFLogger.info("accessToken is " + accessToken);
+                    username = jwtService.extractUsername(accessToken);
+                }
+            }
         }
 
         if ( username != null & SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = applicationContext.getBean(CustomUserDetailsService.class).loadUserByUsername(username);
-            List<Cookie> cookieList = List.of(request.getCookies());
-            refreshToken = cookieList.stream().filter(c -> c.getName() == "jwtCookieForRefresh").findFirst().map(Cookie::getValue).orElse(null);
+            jwtAFLogger.info("inside getAuthentication");
+//            List<Cookie> cookieList = List.of(request.getCookies());
+//            refreshToken = cookieList.stream().filter(c -> c.getName() == "jwtCookieForRefresh").findFirst().map(Cookie::getValue).orElse(null);
+            refreshToken = Arrays.stream(request.getCookies())
+                    .filter(c -> c.getName().equals("jwtCookieForRefresh"))
+                    .findFirst()
+                    .map(Cookie::getValue)
+                    .orElseGet(()-> null);
+            jwtAFLogger.info("refreshToken is " + refreshToken);
             if (jwtService.validateToken(accessToken, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

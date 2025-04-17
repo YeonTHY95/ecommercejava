@@ -89,7 +89,7 @@ const MyCart = () => {
         console.log("Total Price is ", totalPrice);
         console.log("Add to Cart List is ", addToCartList);
         try {
-            const makeOrderResponse = await axios.post('http://localhost:8000/api/makeOrder', {
+            const makeOrderResponse = await axiosWithCredentials.post('http://localhost:8000/api/makeOrder', {
                 user: userInfo.userId,
                 totalPrice: totalPrice,
                 orderList: addToCartList

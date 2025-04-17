@@ -3,6 +3,7 @@ package com.example.yeon.ecommercejava.controller;
 
 import com.example.yeon.ecommercejava.dto.*;
 import com.example.yeon.ecommercejava.entity.UserEntity;
+import com.example.yeon.ecommercejava.security.CustomUserDetailsService;
 import com.example.yeon.ecommercejava.security.JWTService;
 import com.example.yeon.ecommercejava.services.UserService;
 import jakarta.servlet.http.Cookie;
@@ -12,10 +13,13 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -26,6 +30,9 @@ public class UserController {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    ApplicationContext applicationContext;
 
     @Autowired
     JWTService jwtService;
@@ -87,23 +94,27 @@ public class UserController {
     }
 
     @PostMapping("/api/refresh")
-    public void refreshToken(HttpServletRequest request, HttpServletResponse response) {
+    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String refreshToken = Arrays.stream(request.getCookies())
                 .filter(c -> c.getName().equals("refreshToken"))
                 .findFirst()
                 .map(Cookie::getValue)
                 .orElse(null);
 
-        if (refreshToken != null && jwtService.validateToken(refreshToken)) {
-            String username = extractUsername(refreshToken);
-            // reissue new access token
-            String newAccessToken = createAccessToken(username);
+        String username = jwtService.extractUsername(refreshToken);
 
-            Cookie newAccessCookie = new Cookie("accessToken", newAccessToken);
+        UserDetails userDetails = applicationContext.getBean(CustomUserDetailsService.class).loadUserByUsername(username);
+
+        if (refreshToken != null && jwtService.validateToken(refreshToken, userDetails)) {
+
+            // reissue new access token
+            String newAccessToken = jwtService.generateAccessToken(username);
+
+            Cookie newAccessCookie = new Cookie("jwtCookie", newAccessToken);
             newAccessCookie.setHttpOnly(true);
-            newAccessCookie.setSecure(true);
+//            newAccessCookie.setSecure(true);
             newAccessCookie.setPath("/");
-            newAccessCookie.setMaxAge(60 * 15); // 15 minutes
+            newAccessCookie.setMaxAge(24 * 60 * 60); // 1 day
             response.addCookie(newAccessCookie);
         } else {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid refresh token");

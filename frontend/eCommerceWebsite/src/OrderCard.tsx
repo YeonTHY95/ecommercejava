@@ -41,7 +41,8 @@ const OrderCard = ({orderId,inventoryId,title, name, rating, price,imageUrl,cate
                 const cancelOrderResponse = await axios.delete('http://localhost:8000/api/cancelOrder', {
                     data: {
                         orderId,
-                        role
+                        role,
+//                         updatedStatus: "Cancel Order"
                     }
                 });
                 if (cancelOrderResponse.status === 200) {
@@ -69,11 +70,11 @@ const OrderCard = ({orderId,inventoryId,title, name, rating, price,imageUrl,cate
     const updateOrderAction = async (action:string) => {
         try {
             const confirmOrderResponse = await axios.patch('http://localhost:8000/api/updateOrderStatus', {
-                data: {
+//                 data: {
                     orderId,
                     role,
                     updatedStatus: action
-                }
+//                 }
             });
             if (confirmOrderResponse.status === 200) {
                 console.log("Update Order Status Response is ", confirmOrderResponse.data);       

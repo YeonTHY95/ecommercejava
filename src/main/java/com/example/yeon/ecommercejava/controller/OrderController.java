@@ -3,6 +3,7 @@ package com.example.yeon.ecommercejava.controller;
 import com.example.yeon.ecommercejava.dto.*;
 import com.example.yeon.ecommercejava.services.AddToCartService;
 import com.example.yeon.ecommercejava.services.OrderService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,12 +94,19 @@ public class OrderController {
     @ResponseBody
     @DeleteMapping(path="/api/cancelOrder")
     public ResponseEntity<OrderMessage> cancelOrder(@RequestBody OrderRequestDTO orderRequestDTO){
+        orderLogger.info("Delete Request : Cancel Order Status");
+        orderLogger.info("Order ID : " + orderRequestDTO.getOrderId());
+        orderLogger.info("Role : " + orderRequestDTO.getRole());
         return orderService.cancelOrder(orderRequestDTO.getOrderId(), orderRequestDTO.getRole());
     }
 
     @ResponseBody
     @PatchMapping(path="/api/updateOrderStatus")
-    public ResponseEntity<OrderMessage> updateOrderStatus(@RequestBody OrderRequestDTO orderRequestDTO){
+    public ResponseEntity<OrderMessage> updateOrderStatus(@RequestBody OrderRequestDTO orderRequestDTO, HttpServletRequest request){
+        orderLogger.info("Patch Request : Update Order Status");
+        orderLogger.info("Order ID : " + orderRequestDTO.getOrderId());
+        orderLogger.info("Role : " + orderRequestDTO.getRole());
+        orderLogger.info("Updated Status : " + orderRequestDTO.getUpdatedStatus());
         return orderService.updateOrderStatus(orderRequestDTO.getOrderId(), orderRequestDTO.getRole(), orderRequestDTO.getUpdatedStatus());
     }
 

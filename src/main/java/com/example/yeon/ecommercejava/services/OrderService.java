@@ -77,7 +77,8 @@ public class OrderService {
     }
 
     public List<GetOrderResponseObject> getOrderList(String role, Long userId) {
-        List<OrderEntity> orderList = orderRepository.getOrderListByUserId(userId);
+        UserEntity user = userRepository.findById(userId).orElseThrow();
+        List<OrderEntity> orderList = orderRepository.getOrderListByUserId(user);
         List<GetOrderResponseObject> responseList = new ArrayList<>();
         for(OrderEntity order : orderList) {
             InventoryEntity inventoryEntity = order.getInventory();
@@ -103,15 +104,20 @@ public class OrderService {
     public ResponseEntity<OrderMessage> cancelOrder(Long orderId, String role)
     {
         try {
+            orderLogger.info("Cancelled Order ID is " + orderId);
             OrderEntity cancelledOrder = orderRepository.findById(orderId).orElseThrow();
-            if ( role == "Buyer") {
+            orderLogger.info("Inside OrderService's Cancel Order");
+            orderLogger.info("Role is " + role);
+            if ( role.equals("Buyer")) {
                 cancelledOrder.setStatus("Cancelled by Buyer");
                 orderRepository.save(cancelledOrder);
+                orderLogger.info("Order Cancelled Successfully by Buyer");
                 return new ResponseEntity<>(new OrderMessage("Order Cancelled Successfully by Buyer"), HttpStatus.OK);
             }
-            else if (role == "Seller") {
+            else if (role.equals("Seller")) {
                 cancelledOrder.setStatus("Cancelled by Seller");
                 orderRepository.save(cancelledOrder);
+                orderLogger.info("Order Cancelled Successfully by Seller");
                 return new ResponseEntity<>(new OrderMessage("Order Cancelled Successfully by Seller"), HttpStatus.OK);
             }
             return new ResponseEntity<>(new OrderMessage("Error in Response"), HttpStatus.BAD_REQUEST);
@@ -124,6 +130,10 @@ public class OrderService {
 
     public ResponseEntity<OrderMessage> updateOrderStatus(Long orderId, String role, String updatedStatus) {
         try {
+            orderLogger.info("Inside updateOrderStatus");
+            orderLogger.info("Order ID : " + orderId);
+            orderLogger.info("Role : " + role);
+            orderLogger.info("updatedStatus : " + updatedStatus);
             OrderEntity updatedOrder = orderRepository.findById(orderId).orElseThrow();
             updatedOrder.setStatus(updatedStatus);
             orderRepository.save(updatedOrder);
@@ -138,7 +148,8 @@ public class OrderService {
 
     public ResponseEntity<List<GetOrderResponseObject>> getHistoricalOrder(Long userId){
         try {
-            List<OrderEntity> historicalOrderList = orderRepository.getHistoricalOrderListByUserId(userId);
+            UserEntity user = userRepository.findById(userId).orElseThrow();
+            List<OrderEntity> historicalOrderList = orderRepository.getHistoricalOrderListByUserId(user);
             List<GetOrderResponseObject> responseList = new ArrayList<>();
             for(OrderEntity order : historicalOrderList) {
                 InventoryEntity inventoryEntity = order.getInventory();
