@@ -37,6 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String refreshToken = null;
         String username = null;
 
+        jwtAFLogger.info("Inside doFilterInternal Request URL is " + request.getRequestURI());
 //        if (authentionHeader == null || !authentionHeader.startsWith("Bearer ")) {
 //            filterChain.doFilter(request, response);
 //            return;
@@ -68,17 +69,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 //                    .map(Cookie::getValue)
 //                    .orElse(null);
             for (Cookie cookie : request.getCookies()) {
+                jwtAFLogger.info("Inside looping request.getCookies");
+                jwtAFLogger.info("cookie.getName() is " + cookie.getName());
                 if ("jwtCookie".equals(cookie.getName())) {
                     accessToken = cookie.getValue();
                     jwtAFLogger.info("accessToken is " + accessToken);
-                    username = jwtService.extractUsername(accessToken);
+                    username = jwtService.extractUsername(accessToken, false);
+                    jwtAFLogger.info("username is " + username);
                 }
             }
         }
 
         if ( username != null & SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = applicationContext.getBean(CustomUserDetailsService.class).loadUserByUsername(username);
             jwtAFLogger.info("inside getAuthentication");
+            UserDetails userDetails = applicationContext.getBean(CustomUserDetailsService.class).loadUserByUsername(username);
 //            List<Cookie> cookieList = List.of(request.getCookies());
 //            refreshToken = cookieList.stream().filter(c -> c.getName() == "jwtCookieForRefresh").findFirst().map(Cookie::getValue).orElse(null);
             refreshToken = Arrays.stream(request.getCookies())
@@ -87,12 +91,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     .map(Cookie::getValue)
                     .orElseGet(()-> null);
             jwtAFLogger.info("refreshToken is " + refreshToken);
-            if (jwtService.validateToken(accessToken, userDetails)) {
+            if (jwtService.validateToken(accessToken, userDetails, jwtService.getAccessKey())) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
-            else if (jwtService.validateToken(refreshToken, userDetails)){
+            else if (jwtService.validateToken(refreshToken, userDetails,jwtService.getRefreshKey())){
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);

@@ -8,6 +8,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -26,28 +27,33 @@ public class JWTService {
 
     Logger JWTServiceLogger = LoggerFactory.getLogger(JWTService.class);
 
-    private String secretKey = "8kDuhzNm8i9VsLgCkxT1Qan8m4gNpBlReK3L0A6IVkYczCHUmPxrhW5wUc2n0LQE";
-    private String secretKeyForRefreshToken = "8kDuhzNm8i9VsLgCkxT1Qan8m4gNpBlReK3L0A6IVkYczCHUmPxrhW5wUc2n0LQW";
-    private Integer jwtExpirationInMs =  10 * 1000 ; //10 * 60 * 1000; // 10 minutes
+    @Value("${jwt.secret}")
+    private String secretKey;
+
+    @Value("${jwt.refresh-secret}")
+    private String secretKeyForRefreshToken;
+
+
+    private Integer jwtExpirationInMs = 15000 ; //10 * 1000 ; //10 * 60 * 1000; // 10 minutes
 
     Map<String, Object> claims = new HashMap<>();
 
-    public JWTService() {
-        try{
-            KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA256");
-            SecretKey sk = Keys.secretKeyFor(SignatureAlgorithm.HS512); //keyGenerator.generateKey();
-            SecretKey skR = Keys.secretKeyFor(SignatureAlgorithm.HS512); //keyGenerator.generateKey();
-            this.secretKey = Base64.getEncoder().encodeToString(sk.getEncoded());
-            this.secretKeyForRefreshToken = Base64.getEncoder().encodeToString(skR.getEncoded());
-        }
-        catch (NoSuchAlgorithmException e){
-            throw new RuntimeException(e);
-        }
-    }
+//    public JWTService() {
+//        try{
+//            KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA256");
+//            SecretKey sk = Keys.secretKeyFor(SignatureAlgorithm.HS512); //keyGenerator.generateKey();
+//            SecretKey skR = Keys.secretKeyFor(SignatureAlgorithm.HS512); //keyGenerator.generateKey();
+//            this.secretKey = Base64.getEncoder().encodeToString(sk.getEncoded());
+//            this.secretKeyForRefreshToken = Base64.getEncoder().encodeToString(skR.getEncoded());
+//        }
+//        catch (NoSuchAlgorithmException e){
+//            throw new RuntimeException(e);
+//        }
+//    }
 
     public String generateAccessToken(String username) {
         JWTServiceLogger.info("Generating access Token");
-        JWTServiceLogger.info("secretKey is " + secretKey);
+        JWTServiceLogger.info("secretKey is " + this.secretKey);
         return Jwts.builder()
                 .claims()
                 .add(claims)
@@ -55,13 +61,13 @@ public class JWTService {
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + jwtExpirationInMs))
                 .and()
-                .signWith(SignatureAlgorithm.HS512, secretKey)
+                .signWith( SignatureAlgorithm.HS512,getAccessKey())
                 .compact();
     }
 
     public String generateRefreshToken(String username) {
         JWTServiceLogger.info("Generating refresh Token");
-        JWTServiceLogger.info("secretKeyForRefreshToken is " + secretKeyForRefreshToken);
+        JWTServiceLogger.info("secretKeyForRefreshToken is " + this.secretKey);
         return Jwts.builder()
                 .claims()
                 .add(claims)
@@ -69,7 +75,7 @@ public class JWTService {
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000 )) // 24 hours
                 .and()
-                .signWith(SignatureAlgorithm.HS512, secretKeyForRefreshToken)
+                .signWith(SignatureAlgorithm.HS512,getRefreshKey())
                 .compact();
     }
 
@@ -81,38 +87,60 @@ public class JWTService {
 //                .getSubject();
 //    }
 
-    private SecretKey getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+    private SecretKey getSignInKey(String sk) {
+        byte[] keyBytes = Decoders.BASE64.decode(sk);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = extractAllClaims(token);
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver, SecretKey key) {
+        final Claims claims = extractAllClaims(token, key);
         return claimsResolver.apply(claims);
     }
 
-    public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+    public String extractUsername(String token, boolean isRefreshToken) {
+        SecretKey key = isRefreshToken ? getRefreshKey() : getAccessKey();
+        return extractClaim(token, Claims::getSubject, key);
     }
 
-    public Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
+    public Date extractExpiration(String token, boolean isRefreshToken) {
+        SecretKey key = isRefreshToken ? getRefreshKey() : getAccessKey();
+        return extractClaim(token, Claims::getExpiration, key);
     }
 
-    private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
-    }
-    private Claims extractAllClaims (String token) {
-        return Jwts.parser().verifyWith(getSignInKey()).build().parseSignedClaims(token).getPayload();
+    private boolean isTokenExpired(String token, boolean isRefreshToken) {
+        SecretKey key = isRefreshToken ? getRefreshKey() : getAccessKey();
+        return extractExpiration(token, isRefreshToken).before(new Date());
     }
 
-    public boolean validateToken(String token, UserDetails userDetails) {
+    private Claims extractAllClaims(String token, SecretKey key) {
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+
+    public boolean validateToken(String token, UserDetails userDetails, SecretKey key) {
         try {
-            final String username = extractUsername(token);
-            return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+            boolean isRefresh = false ;
+            if ( key == getRefreshKey()) {
+                isRefresh = true ;
+            }
+            final String username = extractClaim(token, Claims::getSubject, key);
+            return username.equals(userDetails.getUsername()) && !isTokenExpired(token, isRefresh);
         } catch (JwtException | IllegalArgumentException e) {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public SecretKey getAccessKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(this.secretKey);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    public SecretKey getRefreshKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(this.secretKeyForRefreshToken);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 }

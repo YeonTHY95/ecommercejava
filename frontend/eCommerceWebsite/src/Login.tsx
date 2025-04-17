@@ -2,6 +2,7 @@ import { Form, useNavigate, NavLink, useLocation } from 'react-router-dom';
 import { useState, useRef, useContext } from 'react';
 import axios from 'axios';
 import { AuthenticationContext } from './RootLayout';
+import axiosWithCredentials,{requestInterceptor, responseInterceptor} from './axiosWithCredentials';
 
 
 const Login = () => {
@@ -27,14 +28,14 @@ const Login = () => {
     }
 
     try {
-        const axiosSignInResponse = await axios.post('http://localhost:8000/api/login', {
+        const axiosSignInResponse = await axiosWithCredentials.post('http://localhost:8000/api/login', {
             username: signinName,
             password: signinPassword
         });
     
         if (axiosSignInResponse.status === 200) {
             console.log("axiosSignInResponse data is ",axiosSignInResponse.data);
-            const getRoleResponse = await axios.get(`http://localhost:8000/api/userinfo?id=${axiosSignInResponse.data?.user?.pk}`);
+            const getRoleResponse = await axiosWithCredentials.get(`http://localhost:8000/api/userinfo?id=${axiosSignInResponse.data?.user?.pk}`);
 
             if (getRoleResponse.status === 200) {
                 console.log("getRoleResponse data is ", getRoleResponse.data);

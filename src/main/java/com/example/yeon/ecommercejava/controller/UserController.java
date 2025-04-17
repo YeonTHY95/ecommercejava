@@ -45,7 +45,7 @@ public class UserController {
     public ResponseEntity<LoginResponse> login(@RequestBody LoginDTO loginDTO, HttpServletResponse response) {
         userLogger.info("Inside Login API");
         String token = userService.verifyUser(loginDTO);
-        if (token == "Failed JWT Authentication") {
+        if (token.equals( "Failed JWT Authentication")) {
             userLogger.info("Failed JWT Authentication");
             return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
         }
@@ -65,10 +65,12 @@ public class UserController {
         cookieForRefreshToken.setHttpOnly(true);
         cookieForRefreshToken.setMaxAge(3 * 24 * 60 * 60); // 3 day
 
+        userLogger.info("Access Token is " + token);
+        userLogger.info("Refresh Token is " + jwtService.generateRefreshToken(loginDTO.getUsername()));
         response.addCookie(cookie);
         response.addCookie(cookieForRefreshToken);
 
-        LoginResponse loginResponse = new LoginResponse(token,jwtService.extractExpiration(token), new UserResponseDTO(String.valueOf(userId)));
+        LoginResponse loginResponse = new LoginResponse(token,jwtService.extractExpiration(token, false), new UserResponseDTO(String.valueOf(userId)));
         userLogger.info("loginResponse is " + loginResponse);
         return new ResponseEntity<>(loginResponse, HttpStatus.OK);
     }
@@ -95,17 +97,19 @@ public class UserController {
 
     @PostMapping("/api/refresh")
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String refreshToken = Arrays.stream(request.getCookies())
-                .filter(c -> c.getName().equals("refreshToken"))
-                .findFirst()
-                .map(Cookie::getValue)
-                .orElse(null);
+        userLogger.info("Inside API Refresh");
+        String refreshToken = null;
+        for (Cookie cookie : request.getCookies()) {
+            if (cookie.getName().equals("jwtCookieForRefresh")) {
+                refreshToken = cookie.getValue();
+            }
+        }
 
-        String username = jwtService.extractUsername(refreshToken);
+        String username = jwtService.extractUsername(refreshToken, true);
 
         UserDetails userDetails = applicationContext.getBean(CustomUserDetailsService.class).loadUserByUsername(username);
 
-        if (refreshToken != null && jwtService.validateToken(refreshToken, userDetails)) {
+        if (refreshToken != null && jwtService.validateToken(refreshToken, userDetails, jwtService.getRefreshKey())) {
 
             // reissue new access token
             String newAccessToken = jwtService.generateAccessToken(username);

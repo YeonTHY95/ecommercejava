@@ -39,11 +39,11 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         securityConfigLogger.info("Inside SecurityFilterChain");
         return http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()) )// 👈 IMPORTANT
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()) )
                 .csrf(customizer -> customizer.disable())
                 .authorizeHttpRequests(request ->
                         request
-                        .requestMatchers("/api/**").permitAll()
+                        .requestMatchers("/api/login","/api/signup","/api/getHotSalesInventory","/api/searchInventory","/api/getInventoryDetail","/api/getInventoryTitleList","/api/getInventoryCategory").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
