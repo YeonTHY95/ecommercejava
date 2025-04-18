@@ -1,4 +1,4 @@
-INSERT INTO users (id,username,password, age, sex, phone_number, role,date_joined) VALUES (1,'FirstSeller','pbkdf2_sha256$870000$KSMStVMrKrAUpNdvou6NNk$Ogn+397mXhy1z0/pJ1LpAoMdR6x+0WEdr+Oik03uhfA=', 25, 'Male', '0121234567', 'Seller',now()) ;
+INSERT INTO users (id,username,password, age, sex, phone_number, role,date_joined) VALUES (1,'FirstSeller','$2y$10$DEUjbG3mzmr9VsgwpU8/l.rBTJfUTgYay2bZ2nudUs/oVQrlERfd.', 25, 'Male', '0121234567', 'Seller',now()) ;
 -- Insert statements for inventory items
 -- Insert statements for inventory items
 INSERT INTO inventories (id, inventory_id, title, name, description, brand, category, color, material, hot_sales_score, weight, rating, price, quantity, width, height, length, discount, image_url, status, seller) VALUES

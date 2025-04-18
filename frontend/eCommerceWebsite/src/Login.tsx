@@ -61,6 +61,7 @@ const Login = () => {
     catch(error) {
         if (axios.isAxiosError(error)) {
             console.log("SignIn Error response is ", error.response);
+            setInvalidMessage("Login Error, make sure username or password is correct");
         }
         else {
             console.log("SignIn Error is ", error);

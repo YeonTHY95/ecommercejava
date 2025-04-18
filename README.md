@@ -15,7 +15,26 @@
 
 This is a full stack web application demonstration built with React, TypeScript, Tailwind CSS, PostgreSQL, Java Framework Spring Boot and so on. Buyer is able to add desired inventory to the cart and make order. Also, buyer is able to view the order's status. The seller is able to confirm and update the order status with the buyer.
 
-## --- Ongoing Project ---
+### Main Page
+![main-page](./frontend/eCommerceWebsite/public/ec-ss-mainpage.png)
+
+### Inventory Search Page
+![search-page](./frontend/eCommerceWebsite/public/ec-ss-searchpage.png)
+
+### My Cart
+![search-page](./frontend/eCommerceWebsite/public/ec-ss-mycart.png)
+
+### Pending Order
+![search-page](./frontend/eCommerceWebsite/public/ec-ss-pendingorder.png)
+
+### Historical Order
+![search-page](./frontend/eCommerceWebsite/public/ec-ss-historicalorder.png)
+
+### Seller's View
+![search-page](./frontend/eCommerceWebsite/public/ec-ss-sellerview.png)
+
+### Inventory Detail Page
+![search-page](./frontend/eCommerceWebsite/public/ec-ss-inventorydetail.png)
 
 Images source : FreePik, https://www.freepik.com/
 
@@ -67,25 +86,21 @@ Install the project dependencies for frontend using npm:
 >
 > npm run dev
 
-Then for backend using Spring Boot:
-
-> cd .. && cd ..
->
-> cd backend
->
-> 
-
+For backend, use any Java IDE of your choice like Eclipse or IntelliJ IDEA
 
 ### Seeding Database
 
-To populate database with User Model and Inventory Model Info from file userseeding.json and inventoryseeding.json under folder fixtures
+To populate database with file named **data.sql** under folder resources 
 
+Remember to configure the parameter in **application.properties** under folder resources as shown below :
+
+> spring.sql.init.mode=always
 
 The seller's username is **FirstSeller** with password **test** (in plain text without encryption).
 
 ### Running the Project
 
-> python manage.py runserver
+Run the Java Application on IDE of your choice for backend service.
 
 Open http://localhost:5173/ in your browser to view the project. Make sure PostgreSQL is up and running
 

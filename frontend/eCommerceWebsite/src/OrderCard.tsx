@@ -4,6 +4,7 @@ import { useContext,useState } from 'react';
 import { AuthenticationContext } from './RootLayout';
 import axios from 'axios';
 import { OrderInterface } from './typeDefinition';
+import axiosWithCredentials from './axiosWithCredentials';
 
 const OrderCard = ({orderId,inventoryId,title, name, rating, price,imageUrl,category,orderQuantity,buyer,seller,status,orderDate,role, selectedColor,orderList, setOrderList}:{
         orderId:number,
@@ -38,7 +39,7 @@ const OrderCard = ({orderId,inventoryId,title, name, rating, price,imageUrl,cate
         else {
             console.log("Cancel Order Clicked for orderID ", orderId," ", title);
             try {
-                const cancelOrderResponse = await axios.delete('http://localhost:8000/api/cancelOrder', {
+                const cancelOrderResponse = await axiosWithCredentials.delete('http://localhost:8000/api/cancelOrder', {
                     data: {
                         orderId,
                         role,
@@ -69,7 +70,7 @@ const OrderCard = ({orderId,inventoryId,title, name, rating, price,imageUrl,cate
 
     const updateOrderAction = async (action:string) => {
         try {
-            const confirmOrderResponse = await axios.patch('http://localhost:8000/api/updateOrderStatus', {
+            const confirmOrderResponse = await axiosWithCredentials.patch('http://localhost:8000/api/updateOrderStatus', {
 //                 data: {
                     orderId,
                     role,

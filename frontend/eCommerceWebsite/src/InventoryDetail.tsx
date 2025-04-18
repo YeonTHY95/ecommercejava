@@ -4,6 +4,7 @@ import { AuthenticationContext } from './RootLayout';
 import axios from 'axios';
 import type {InventoryDetailInterface} from './typeDefinition'
 import clsx from 'clsx';
+import axiosWithCredentials from './axiosWithCredentials';
 
 
 const InventoryDetail = () => {
@@ -55,7 +56,7 @@ const InventoryDetail = () => {
     else {
       console.log("Add to Cart Clicked for ", inventoryDetail?.title);
       try {
-        const addToCartAction = await axios.post('http://localhost:8000/api/addToCart', {
+        const addToCartAction = await axiosWithCredentials.post('http://localhost:8000/api/addToCart', {
           user: userInfo.userId,
           inventory: inventoryDetail?.id,
           quantity: addToCartQuantity,

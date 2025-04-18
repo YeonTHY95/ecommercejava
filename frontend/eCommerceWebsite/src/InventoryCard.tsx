@@ -6,6 +6,7 @@ import axios from 'axios';
 import { InventoryInterface } from './typeDefinition';
 import clsx from 'clsx';
 import toast, { Toaster } from 'react-hot-toast';
+import axiosWithCredentials from './axiosWithCredentials';
 
 
 const InventoryCard = ({id,title, name, rating, price,imageUrl,category,stockQuantity,color}:InventoryInterface) => {
@@ -24,7 +25,7 @@ const InventoryCard = ({id,title, name, rating, price,imageUrl,category,stockQua
     else {
       console.log("Add to Cart Clicked for ", title);
       try {
-        const addToCartAction = await axios.post('http://localhost:8000/api/addToCart', {
+        const addToCartAction = await axiosWithCredentials.post('http://localhost:8000/api/addToCart', {
           user: userInfo.userId,
           inventory: id,
           quantity: 1,
