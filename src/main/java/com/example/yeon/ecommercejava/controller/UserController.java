@@ -6,6 +6,8 @@ import com.example.yeon.ecommercejava.entity.UserEntity;
 import com.example.yeon.ecommercejava.security.CustomUserDetailsService;
 import com.example.yeon.ecommercejava.security.JWTService;
 import com.example.yeon.ecommercejava.services.UserService;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -95,7 +98,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("/api/refresh")
+    @PostMapping(value={"/api/refresh", "/api/refresh/"}, produces = "application/json")
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         userLogger.info("Inside API Refresh");
         String refreshToken = null;
@@ -105,21 +108,42 @@ public class UserController {
             }
         }
 
-        String username = jwtService.extractUsername(refreshToken, true);
+        if (refreshToken == null) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing refresh token");
+            return;
+        }
+
+//        String username = jwtService.extractUsername(refreshToken, true);
+        SecretKey refreshKey = jwtService.getRefreshKey();
+        userLogger.info("refreshKey is " + refreshKey);
+        Claims claims = Jwts.parser()
+                .verifyWith(refreshKey)
+                .build()
+                .parseSignedClaims(refreshToken)
+                .getPayload();
+
+        String username = claims.getSubject();
+        userLogger.info("username from claims.getSubject is " + username);
 
         UserDetails userDetails = applicationContext.getBean(CustomUserDetailsService.class).loadUserByUsername(username);
 
+        userLogger.info("userDetails from applicationContext.getBean is " + userDetails);
+
         if (refreshToken != null && jwtService.validateToken(refreshToken, userDetails, jwtService.getRefreshKey())) {
-
+            userLogger.info("Inside Validate Refresh Token");
+            username = jwtService.extractUsername(refreshToken, true);
             // reissue new access token
+            userLogger.info("username from jwtService.extractUsername is " + username);
             String newAccessToken = jwtService.generateAccessToken(username);
-
+            userLogger.info("newAccessToken is " + newAccessToken);
             Cookie newAccessCookie = new Cookie("jwtCookie", newAccessToken);
             newAccessCookie.setHttpOnly(true);
 //            newAccessCookie.setSecure(true);
             newAccessCookie.setPath("/");
             newAccessCookie.setMaxAge(24 * 60 * 60); // 1 day
             response.addCookie(newAccessCookie);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"message\": \"Access token refreshed\"}");
         } else {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid refresh token");
         }

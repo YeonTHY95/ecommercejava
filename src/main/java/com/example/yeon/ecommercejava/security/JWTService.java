@@ -54,6 +54,11 @@ public class JWTService {
     public String generateAccessToken(String username) {
         JWTServiceLogger.info("Generating access Token");
         JWTServiceLogger.info("secretKey is " + this.secretKey);
+        Date now = new Date();
+        Date exp = new Date(System.currentTimeMillis() + jwtExpirationInMs);
+
+        JWTServiceLogger.info("IssuedAt: " + now);
+        JWTServiceLogger.info("ExpiresAt: " + exp);
         return Jwts.builder()
                 .claims()
                 .add(claims)
@@ -122,8 +127,11 @@ public class JWTService {
 
     public boolean validateToken(String token, UserDetails userDetails, SecretKey key) {
         try {
+            JWTServiceLogger.info("Inside JWTService's ValidateToken");
+            JWTServiceLogger.info("Secret Key is " + key);
+            JWTServiceLogger.info("getRefreshKey() " + getRefreshKey());
             boolean isRefresh = false ;
-            if ( key == getRefreshKey()) {
+            if ( key.equals(getRefreshKey())) {
                 isRefresh = true ;
             }
             final String username = extractClaim(token, Claims::getSubject, key);

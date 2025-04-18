@@ -43,7 +43,7 @@ public class SecurityConfig {
                 .csrf(customizer -> customizer.disable())
                 .authorizeHttpRequests(request ->
                         request
-                        .requestMatchers("/api/login","/api/signup","/api/getHotSalesInventory","/api/searchInventory","/api/getInventoryDetail","/api/getInventoryTitleList","/api/getInventoryCategory").permitAll()
+                        .requestMatchers("/api/refresh","/api/refresh/","/api/login","/api/signup","/api/getHotSalesInventory","/api/searchInventory","/api/getInventoryDetail","/api/getInventoryTitleList","/api/getInventoryCategory").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

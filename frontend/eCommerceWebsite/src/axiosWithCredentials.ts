@@ -37,7 +37,8 @@ export const responseInterceptor = axiosWithCredentials.interceptors.response.us
         console.log(`Inside Response Interception Second Request`);
 
         try {
-            const secondResponse = await axios.get("http://localhost:8000/api/refresh/",
+            const secondResponse = await axios.post("http://localhost:8000/api/refresh/",
+                {},
                 {
                     withCredentials: true
                 }

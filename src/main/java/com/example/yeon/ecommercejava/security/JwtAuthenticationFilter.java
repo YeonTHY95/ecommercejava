@@ -37,6 +37,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String refreshToken = null;
         String username = null;
 
+        String path = request.getRequestURI();
+        jwtAFLogger.info("Request URI: " + request.getRequestURI());
+        if (path.startsWith("/api/login") || path.startsWith("/api/refresh")) {
+            jwtAFLogger.info("Inside doFilterInternal, the path is path.equals to /api/refresh ? Answer : " + path.startsWith("/api/refresh") );
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         jwtAFLogger.info("Inside doFilterInternal Request URL is " + request.getRequestURI());
 //        if (authentionHeader == null || !authentionHeader.startsWith("Bearer ")) {
 //            filterChain.doFilter(request, response);
