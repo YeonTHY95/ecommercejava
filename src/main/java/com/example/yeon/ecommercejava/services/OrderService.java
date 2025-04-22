@@ -5,6 +5,8 @@ import com.example.yeon.ecommercejava.dto.*;
 import com.example.yeon.ecommercejava.entity.InventoryEntity;
 import com.example.yeon.ecommercejava.entity.OrderEntity;
 import com.example.yeon.ecommercejava.entity.UserEntity;
+import com.example.yeon.ecommercejava.events.OrderEvent;
+import com.example.yeon.ecommercejava.producer.OrderProducer;
 import com.example.yeon.ecommercejava.repository.InventoryRepository;
 import com.example.yeon.ecommercejava.repository.OrderRepository;
 import com.example.yeon.ecommercejava.repository.UserRepository;
@@ -15,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -25,13 +28,16 @@ public class OrderService {
     private InventoryRepository inventoryRepository;
     private UserRepository userRepository;
 
+    private final OrderProducer orderProducer;
+
     public static final Logger orderLogger = LoggerFactory.getLogger(OrderService.class);
 
-    public OrderService(OrderRepository orderRepository, ModelMapper modelMapper, InventoryRepository inventoryRepository,UserRepository userRepository) {
+    public OrderService(OrderRepository orderRepository, ModelMapper modelMapper, InventoryRepository inventoryRepository,UserRepository userRepository, OrderProducer orderProducer) {
         this.orderRepository = orderRepository;
         this.modelMapper = modelMapper;
         this.inventoryRepository = inventoryRepository;
         this.userRepository = userRepository;
+        this.orderProducer = orderProducer;
     }
 
     public String checkIfInventoryQuantityEnough(Long inventoryId, Integer requestedQuantity){
@@ -70,7 +76,21 @@ public class OrderService {
             orderEntity.setStatus("Pending Seller's Confirmation");
             orderEntity.setQuantity(requestedQuantity);
             orderEntity.setSelectedColor(selectedColor);
-            orderRepository.save(orderEntity);
+            OrderEntity newOrderEntity = orderRepository.save(orderEntity);
+
+            // Create Order Event
+
+            OrderEvent orderEvent = new OrderEvent();
+            orderEvent.setId(newOrderEntity.getId());
+            orderEvent.setBuyer(buyer.getId());
+            orderEvent.setSeller(seller.getId());
+            orderEvent.setInventory(inventoryId);
+            orderEvent.setStatus("Pending Seller's Confirmation");
+            orderEvent.setQuantity(requestedQuantity);
+            orderEvent.setSelectedColor(selectedColor);
+            orderEvent.setOrderDate(newOrderEntity.getOrderDate());
+
+            orderProducer.sendOrderEvent(orderEvent);
 
             return true;
         }

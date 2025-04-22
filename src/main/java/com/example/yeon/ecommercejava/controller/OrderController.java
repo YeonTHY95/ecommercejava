@@ -1,6 +1,7 @@
 package com.example.yeon.ecommercejava.controller;
 
 import com.example.yeon.ecommercejava.dto.*;
+import com.example.yeon.ecommercejava.producer.OrderProducer;
 import com.example.yeon.ecommercejava.services.AddToCartService;
 import com.example.yeon.ecommercejava.services.OrderService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,10 +23,13 @@ public class OrderController {
 //    private final ModelMapper modelMapper;
     private AddToCartService addToCartService;
 
-    public OrderController(OrderService orderService, ModelMapper modelMapper, AddToCartService addToCartService) {
+    private final OrderProducer orderProducer;
+
+    public OrderController(OrderService orderService, ModelMapper modelMapper, AddToCartService addToCartService,OrderProducer orderProducer) {
         this.orderService = orderService;
         this.addToCartService = addToCartService;
 //        this.modelMapper = modelMapper;
+        this.orderProducer = orderProducer;
     }
 
     @ResponseBody
