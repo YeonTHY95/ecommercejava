@@ -67,7 +67,7 @@ public class UserService {
             registeredUser.setSex(signUpDTO.getSex());
             registeredUser.setPhoneNumber(signUpDTO.getPhoneNumber());
             registeredUser.setUsername(signUpDTO.getUsername());
-            registeredUser.setPassword(passwordEncoder.encode(signUpDTO.getUsername()));
+            registeredUser.setPassword(passwordEncoder.encode(signUpDTO.getPassword()));
             userRepository.save(registeredUser);
             return "User Signup Successfully";
         }
